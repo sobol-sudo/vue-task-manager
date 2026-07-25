@@ -1,123 +1,78 @@
-# 📝 To-Do List App
+# Vue Task Manager
 
-![image](https://github.com/user-attachments/assets/4088a259-3b9b-4e44-8a2a-7861419d01b3)
+A single-page task manager built with Vue 3, TypeScript and Vite. A single Pinia store backs two persistence modes — `localStorage` during development and a REST API in production — so components stay unaware of where data comes from. The UI ships with light/dark themes, English/Russian localization, and both unit (Vitest) and end-to-end (Cypress) test suites.
 
-## 🚀 Описание проекта
-To-Do List — это веб-приложение для управления задачами, разработанное на **Vue 3** с использованием **Pinia** для управления состоянием и **Vue Router** для маршрутизации. Приложение поддерживает локальное хранилище в режиме разработки и API в продакшене.
+![Task manager UI](https://github.com/user-attachments/assets/4088a259-3b9b-4e44-8a2a-7861419d01b3)
 
-env-файлы выложены специально
----
+Live demo: https://super-to-do-list.vercel.app
 
-## 📦 Используемые технологии
+## Tech stack
 
-| Технология | Версия | Описание |
-|------------|--------|----------|
-| **Vue 3** | `^3.5.13` | Фреймворк для построения UI |
-| **Pinia** | `^3.0.1` | Управление состоянием |
-| **Vue Router** | `^4.5.0` | Маршрутизация |
-| **Vue I18n** | `^11.1.1` | Локализация |
-| **Vue Toastification** | `^2.0.0-rc.5` | Уведомления |
-| **TailwindCSS** | `^4.0.9` | Стилизация UI |
-| **Vite** | `^6.1.0` | Быстрая сборка и Dev-сервер |
-| **Cypress** | `^14.0.3` | End-to-End тестирование |
-| **Vitest** | `^3.0.7` | Unit-тестирование |
+- **Vue 3** (Composition API, `<script setup>`) with **TypeScript**
+- **Pinia** — state management
+- **Vue Router** — client-side routing with lazy-loaded views
+- **Vue I18n** — English and Russian locales
+- **TailwindCSS 4** — styling, including dark mode
+- **Vue Toastification** — feedback on store actions
+- **Vite 6** — dev server and build (gzip + brotli precompression, manual vendor chunks, bundle visualizer)
+- **Vitest**, **Vue Test Utils**, **@pinia/testing** — unit tests
+- **Cypress** — end-to-end tests
+- **ESLint**, **Prettier**, **vue-tsc** — linting, formatting, type checking
 
----
+## Features
 
-## 📂 Структура проекта
-```
-📦 to-do-app
-├── 📂 src
-│   ├── 📂 components     # UI-компоненты
-│   ├── 📂 views          # Основные страницы
-│   ├── 📂 store          # Pinia-хранилище
-│   ├── 📂 router         # Vue Router маршруты
-│   ├── 📂 i18n           # Локализация
-│   ├── 📂 assets         # Стили и изображения
-│   ├── main.ts           # Точка входа
-│   ├── App.vue           # Корневой компонент
-├── 📂 cypress            # E2E-тесты
-├── 📂 tests              # Unit-тесты
-├── vite.config.ts        # Конфигурация Vite
-├── cypress.config.ts     # Конфигурация Cypress
-├── tsconfig.json         # Конфигурация TypeScript
-├── package.json          # Зависимости проекта
-└── README.md             # Этот файл
-```
+- Create tasks with a priority level (low / medium / high), rendered as a colored marker
+- Toggle completion by clicking a task; remove it with a per-item delete button
+- Filter by all / active / completed, combined with case-insensitive text search
+- Import and export the task list as JSON, with shape validation on import
+- Incremental rendering — 15 tasks at a time, extended as you scroll
+- Light and dark theme, initialized from the OS `prefers-color-scheme` and persisted in `localStorage`
+- Language switching between English and Russian, persisted in `localStorage`
+- Two persistence modes behind one store: `localStorage` in development, REST API (`VITE_API_URL`) in production
+- Three routes — Home, Settings, About — all lazy-loaded
 
----
+## Testing
 
-## ⚡ Инструкция по запуску
+Unit tests sit next to the components in `src/components/__tests__` and run in jsdom. Components are mounted with Vue Test Utils against a `createTestingPinia` instance, so store actions are asserted as spies instead of through real persistence:
 
-### 1️⃣ Установка зависимостей
-```sh
-npm install
-```
+- `TaskInput.spec.ts` — dispatches `addTask` on submit, and does nothing when the input is empty
+- `TaskItem.spec.ts` — dispatches `toggleTask` on click and `removeTask` from the delete button
 
-### 2️⃣ Запуск в режиме разработки
-```sh
-npm run dev
-```
-Приложение будет доступно по адресу: **http://localhost:5173/**
-
-### 3️⃣ Сборка для продакшена
-```sh
-npm run build
-```
-
-### 4️⃣ Предпросмотр продакшн-версии
-```sh
-npm run preview
-```
-
----
-
-## 🏗️ Архитектурные решения и подходы к реализации
-
-### 📌 **Архитектура приложения**
-Приложение построено по **SPA (Single Page Application) архитектуре** и использует:
-- **Компонентный подход** (Vue 3 + Composition API)
-- **Pinia** для централизованного управления состоянием
-- **Vue Router** для маршрутизации
-- **Vue I18n** для локализации
-- **TailwindCSS** для стилизации
-
-### 📌 **Управление состоянием**
-- Используется **Pinia**, так как она **реактивнее и проще Vuex**
-- Разделение стора на **модули** для масштабируемости
-- **Данные загружаются из API в продакшене** и **из localStorage в режиме разработки**
-
-### 📌 **Маршрутизация**
-- Используется **Vue Router** с **Lazy Loading** для загрузки страниц по мере необходимости
-- Поддерживаются **динамические маршруты**
-- **Обработчики ошибок** на случай неверного URL
-
-### 📌 **Тестирование**
-- **Unit-тесты (Vitest)** для компонентов и стора
-- **E2E-тесты (Cypress)** для проверки пользовательских сценариев
-- Используются **моки API** для тестирования работы с сервером
-
----
-
-## 🧪 Тестирование
-
-### 🔹 Запуск unit-тестов (Vitest)
 ```sh
 npm run test:unit
 ```
 
-### 🔹 Запуск End-to-End тестов (Cypress)
+End-to-end tests in `cypress/e2e` run against the production build. `start-server-and-test` boots `vite preview` on port 4173 and hands off to Cypress, so no server has to be started by hand. Components expose `data-testid` hooks, keeping the specs independent of styling. Covered flows: adding a task, toggling its status, deleting it, and verifying tasks survive a page reload.
+
 ```sh
-npm run test:e2e
+npm run test:e2e       # headless, against a production build
+npm run test:e2e:dev   # interactive Cypress runner against the dev server
 ```
 
-_Если тесты не запускаются, убедитесь, что сервер работает:_
+Type checking and linting:
+
 ```sh
+npm run type-check
+npm run lint
+npm run format
+```
+
+## Getting started
+
+The toolchain targets Node.js 22.
+
+```sh
+npm install
+npm run dev
+```
+
+The dev server listens on http://localhost:5173 and persists tasks to `localStorage`.
+
+Production build and local preview:
+
+```sh
+npm run build
 npm run preview
 ```
 
----
-
-## 📜 Лицензия
-Этот проект распространяется под лицензией **MIT**.
-
+Outside development mode the store talks to a REST API instead, issuing `GET`, `POST`, `PUT` and `DELETE` requests against `${VITE_API_URL}/tasks`, so set `VITE_API_URL` before building.
