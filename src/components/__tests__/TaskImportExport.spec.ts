@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { nextTick } from 'vue'
 import { mount, type VueWrapper } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import TaskImportExport from '@/components/TaskImportExport.vue'
@@ -103,7 +104,7 @@ describe('TaskImportExport.vue', () => {
   it('exports a file that its own import accepts, with the same tasks', async () => {
     const { wrapper, importTasks } = mountImportExport()
 
-    await wrapper.get('button').trigger('click')
+    await wrapper.get('[data-testid="export-btn"]').trigger('click')
 
     expect(createObjectURL).toHaveBeenCalledTimes(1)
     expect((click.mock.instances[0] as HTMLAnchorElement).download).toBe('tasks.json')
@@ -117,5 +118,32 @@ describe('TaskImportExport.vue', () => {
 
     expect(importTasks).toHaveBeenCalledWith(tasks)
     expect(toast.error).not.toHaveBeenCalled()
+  })
+
+  /**
+   * A download is the one action in this app the page cannot show the result of
+   * — the browser decides whether and where to reveal it. On an empty list the
+   * button used to hand over a file containing `[]`, so the only feedback a user
+   * got for a backup that contained nothing was a file that looked like one.
+   */
+  it('refuses to export an empty list, and confirms a real one', async () => {
+    const { wrapper, store } = mountImportExport()
+    store.tasks = []
+    await nextTick()
+
+    await wrapper.get('[data-testid="export-btn"]').trigger('click')
+
+    expect(createObjectURL).not.toHaveBeenCalled()
+    expect(click).not.toHaveBeenCalled()
+    expect(toast.error).toHaveBeenCalledWith(messages.error.nothing_to_export)
+    expect(toast.success).not.toHaveBeenCalled()
+
+    store.tasks = [...tasks]
+    await nextTick()
+
+    await wrapper.get('[data-testid="export-btn"]').trigger('click')
+
+    expect(createObjectURL).toHaveBeenCalledTimes(1)
+    expect(toast.success).toHaveBeenCalledWith(messages.tasks_exported)
   })
 })

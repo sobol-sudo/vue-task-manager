@@ -125,8 +125,13 @@ describe('To-Do App', () => {
     addTask(task)
     seeTask(task)
 
-    cy.contains(task).click()
-    cy.contains(task).should('have.class', 'line-through')
+    // Reach the toggle through the row rather than through the task text:
+    // `cy.contains` yields whichever element it prefers, which is not
+    // necessarily the one carrying the state.
+    cy.contains(task).closest('li').find('[data-testid="toggle-btn"]').as('toggle')
+    cy.get('@toggle').click()
+    cy.get('@toggle').should('have.class', 'line-through')
+    cy.get('@toggle').should('have.attr', 'aria-pressed', 'true')
 
     removeTask(task)
   })

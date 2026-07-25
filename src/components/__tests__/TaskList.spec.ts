@@ -6,6 +6,8 @@ import { createTestI18n } from '@/__tests__/testI18n'
 import appI18n from '@/lang/i18n'
 import type { Task } from '@/types'
 
+const messages = appI18n.global.getLocaleMessage('en')
+
 /**
  * These tests drive the real store rather than a testing Pinia: the list is
  * filled by `fetchTasks` on mount, exactly as it is in the browser, so the
@@ -117,6 +119,57 @@ describe('TaskList.vue', () => {
 
     await wrapper.setProps({ searchQuery: 'nothing matches this' })
     expect(wrapper.findAll('li')).toHaveLength(0)
-    expect(wrapper.text()).toContain(appI18n.global.getLocaleMessage('en').no_tasks)
+    expect(wrapper.text()).toContain(messages.no_tasks)
+  })
+
+  /**
+   * An empty list means three different things, and for a while the component
+   * said the same thing for all of them. The worst case was the first load: the
+   * store is empty while the request is in flight, so every visitor was told
+   * their search had found nothing before they had typed anything.
+   *
+   * The fetch is resolved by hand here rather than after a timer, so the
+   * in-flight moment is a fixed point in the test instead of a race with it.
+   */
+  it('tells the three empty states apart', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+
+    let deliverTasks: (tasks: Partial<Task>[]) => void = () => {}
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        () =>
+          new Promise((resolve) => {
+            deliverTasks = (tasks) => resolve({ ok: true, json: async () => tasks })
+          }),
+      ),
+    )
+
+    const wrapper = mount(TaskList, {
+      props: { filter: 'all', searchQuery: '' },
+      global: { plugins: [pinia, createTestI18n('en')] },
+    })
+
+    // Still loading: nothing is known yet, so nothing may be claimed.
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain(messages.loading_tasks)
+    expect(wrapper.text()).not.toContain(messages.no_tasks)
+    expect(wrapper.text()).not.toContain(messages.no_tasks_yet)
+
+    // Loaded, and there is genuinely nothing stored.
+    deliverTasks([])
+    await flushPromises()
+    expect(wrapper.text()).toContain(messages.no_tasks_yet)
+    expect(wrapper.text()).not.toContain(messages.no_tasks)
+    expect(wrapper.text()).not.toContain(messages.loading_tasks)
+
+    // Loaded, tasks exist, and the search matched none of them.
+    const withTasks = await mountList([
+      { id: 1, text: 'Buy milk', completed: false, priority: 'low' },
+    ])
+    await withTasks.setProps({ searchQuery: 'nothing matches this' })
+    expect(withTasks.text()).toContain(messages.no_tasks)
+    expect(withTasks.text()).not.toContain(messages.no_tasks_yet)
   })
 })

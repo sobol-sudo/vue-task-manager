@@ -36,7 +36,11 @@ watch(language, changeLanguage)
 
     <label class="flex gap-2 items-center justify-between">
       <span>{{ t('theme') }}</span>
-      <select v-model="theme" class="p-2 border rounded-md dark:bg-[#1e1e1e]">
+      <select
+        v-model="theme"
+        data-testid="theme-select"
+        class="p-2 border rounded-md dark:bg-[#1e1e1e]"
+      >
         <option value="dark">{{ t('dark') }}</option>
         <option value="light">{{ t('light') }}</option>
       </select>
@@ -44,7 +48,11 @@ watch(language, changeLanguage)
 
     <label class="flex gap-2 items-center justify-between">
       <span>{{ t('language') }}</span>
-      <select v-model="language" class="p-2 border rounded-md dark:bg-[#1e1e1e]">
+      <select
+        v-model="language"
+        data-testid="language-select"
+        class="p-2 border rounded-md dark:bg-[#1e1e1e]"
+      >
         <option value="ru">{{ t('russian') }}</option>
         <option value="en">{{ t('english') }}</option>
       </select>

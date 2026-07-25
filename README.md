@@ -39,10 +39,10 @@ Live demo: https://super-to-do-list.vercel.app
 Unit tests sit in `__tests__` folders next to the code they cover and run in jsdom. Except where a test is specifically about a component refusing to call the store, they use a real Pinia instance and stub only the boundary — `fetch` or a single store action — so the store's own logic actually executes:
 
 - `taskStore.spec.ts` — state is written only once the backend has confirmed the change: a rejected `POST`, `DELETE` or `PUT` leaves the list exactly as it was. Ids arriving as strings are normalized to numbers, so a freshly added task can be removed without a reload, and an import that fails leaves nothing behind.
-- `TaskList.spec.ts` — the list renders one page of 15 and appends the next page per scroll, and narrows correctly by filter and by case-insensitive search.
+- `TaskList.spec.ts` — the list renders one page of 15 and appends the next page per scroll, narrows correctly by filter and by case-insensitive search, and tells its three empty states apart: the fetch is resolved by hand so that "still loading" is a fixed point in the test rather than a race with it.
 - `TaskInput.spec.ts` — submits with the button and with Enter, carrying the selected priority; refuses an empty or whitespace-only task and says why.
-- `TaskImportExport.spec.ts` — a file that is not a task list never reaches the store, and an exported file is accepted by the app's own import with the same tasks.
-- `TaskItem.spec.ts` — dispatches `toggleTask` on click and `removeTask` from the delete button.
+- `TaskImportExport.spec.ts` — a file that is not a task list never reaches the store, an exported file is accepted by the app's own import with the same tasks, and an empty list is refused instead of being handed over as a file containing `[]`.
+- `TaskItem.spec.ts` — the row and the toggle inside it both answer to a click, so the toggle has to stop the event: a task is completed exactly once wherever in the row the click lands, and deleting one does not also toggle it. The toggle is a button carrying `aria-pressed`, and the delete button and the priority dot are named rather than left as an emoji and a colour.
 - `i18n.spec.ts` — both locales define the same keys, and every key the source asks for exists.
 - `HomeView.spec.ts` — the page takes all of its text, heading included, from the catalogue.
 
@@ -53,7 +53,13 @@ npm run test:unit  # watch mode
 
 End-to-end tests live in `cypress/e2e`. `start-server-and-test` boots `vite preview` on port 4173 and hands off to Cypress, so no server has to be started by hand. Components expose `data-testid` hooks, keeping the specs independent of styling.
 
-`to-do-app.cy.ts` drives the app against its real persistence layer — adding a task, toggling it, deleting it, and reloading the page to prove it was stored. `known-task-list.cy.ts` covers what a shared backend cannot support: it replaces persistence for the duration of each test (stubbed REST calls against a production build, seeded `localStorage` against the dev server) and checks pagination past the first page, filtering and search on a list of a known size, and that a JSON import replaces the stored list and survives a reload. Nothing leaves the browser in that spec, so it passes with the backend switched off.
+`to-do-app.cy.ts` drives the app against its real persistence layer — adding a task, toggling it, deleting it, and reloading the page to prove it was stored.
+
+The other three specs replace persistence for the duration of each test through `cypress/support/seededBackend.ts` — stubbed REST calls against a production build, seeded `localStorage` against the dev server — which is what makes it possible to assert on exact counts and on destructive operations. Nothing leaves the browser in any of them, so they pass with the backend switched off:
+
+- `known-task-list.cy.ts` — pagination past the first page, filtering and search on a list of a known size, and a JSON import that replaces the stored list and survives a reload.
+- `keyboard.cy.ts` — every control on the task page is in the tab order, and a task can be completed from the keyboard. Reachability depends on layout, so this can only be measured in a real browser: jsdom does none, and the unit suite cannot see any of it.
+- `routing-and-settings.cy.ts` — each route is reachable from the navigation, an unknown deep link lands on the 404 view with a way back, and the theme and the language survive a reload. The navigation check compares what the browser actually paints, because the failure it guards against was a state class that nothing styled — asserting on the class alone passed against the broken build.
 
 The production build writes to the REST backend, which every run shares with whatever is already stored there, so `to-do-app.cy.ts` is written not to depend on — or disturb — that state:
 
