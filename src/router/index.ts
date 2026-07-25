@@ -6,6 +6,7 @@ const router = createRouter({
     { path: '/', component: () => import('@/views/HomeView.vue') },
     { path: '/settings', component: () => import('@/views/SettingsView.vue') },
     { path: '/about', component: () => import('@/views/AboutView.vue') },
+    { path: '/:pathMatch(.*)*', component: () => import('@/views/NotFoundView.vue') },
   ],
 })
 

@@ -2,6 +2,7 @@
 import { useTaskStore } from '@/store/taskStore'
 import { useToast } from 'vue-toastification'
 import { useI18n } from 'vue-i18n'
+import type { Task } from '@/types'
 
 const { t } = useI18n()
 const toast = useToast()
@@ -20,30 +21,39 @@ const exportTasks = () => {
   URL.revokeObjectURL(url)
 }
 
+const isValidTask = (task: unknown): task is Partial<Task> => {
+  if (typeof task !== 'object' || task === null) return false
+  const candidate = task as Partial<Task>
+
+  return 'id' in candidate && typeof candidate.text === 'string'
+}
+
 const importTasks = (event: Event) => {
-  const file = (event.target as HTMLInputElement).files?.[0]
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
   if (!file) {
     toast.error(t('error.no_file'))
     return
   }
 
   const reader = new FileReader()
-  reader.onload = (e) => {
+  reader.onload = async (e) => {
     try {
-      const importedTasks = JSON.parse(e.target?.result as string)
-      if (
-        !Array.isArray(importedTasks) ||
-        !importedTasks.every((task) => 'id' in task && 'text' in task)
-      ) {
+      const importedTasks: unknown = JSON.parse(e.target?.result as string)
+      if (!Array.isArray(importedTasks) || !importedTasks.every(isValidTask)) {
         toast.error(t('error.invalid_json'))
         return
       }
 
-      taskStore.tasks = importedTasks
-      toast.success(t('import_success'))
+      // The store owns persistence and reports the outcome, so a success
+      // message is never shown for tasks that were not actually saved.
+      await taskStore.importTasks(importedTasks)
     } catch (error) {
       console.error('Failed to read the imported JSON file:', error)
       toast.error(t('error.import_failed'))
+    } finally {
+      // Allow re-importing the same file straight after a failed attempt.
+      input.value = ''
     }
   }
   reader.readAsText(file)

@@ -11,7 +11,7 @@ const theme = ref<'light' | 'dark'>(
     : 'light',
 )
 
-const language = ref<'ru' | 'en'>((localStorage.getItem('language') as 'ru' | 'en') || 'ru')
+const language = ref<'ru' | 'en'>((localStorage.getItem('language') as 'ru' | 'en') || 'en')
 
 const applyTheme = () => {
   document.documentElement.classList.toggle('dark', theme.value === 'dark')
@@ -21,6 +21,7 @@ const applyTheme = () => {
 const changeLanguage = () => {
   localStorage.setItem('language', language.value)
   locale.value = language.value
+  document.documentElement.lang = language.value
 }
 
 watch(theme, applyTheme)

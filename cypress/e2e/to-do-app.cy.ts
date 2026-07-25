@@ -1,32 +1,16 @@
 describe('To-Do App', () => {
-  beforeEach(() => {
-    cy.visit('/')
-  })
+  // The production build these tests run against persists through a shared REST
+  // backend, so every run works with its own task names and removes what it
+  // created. Repeated runs stay independent and leave no test data behind.
+  const uniqueTask = (name: string) => `${name} ${Date.now()}`
 
-  it('adds a new task', () => {
-    cy.get('[data-testid="task-input"]').type('Buy milk')
-
+  const addTask = (text: string) => {
+    cy.get('[data-testid="task-input"]').type(text)
     cy.get(`[data-testid="add-task__btn"]`).should('exist').should('be.visible').click()
+  }
 
-    cy.contains('Buy milk').should('exist')
-  })
-
-  it('toggles the task status', () => {
-    cy.get('[data-testid="task-input"]').type('Do a workout')
-    cy.get(`[data-testid="add-task__btn"]`).should('exist').should('be.visible').click()
-
-    cy.contains('Do a workout').click()
-    cy.contains('Do a workout').should('have.class', 'line-through')
-  })
-
-  it('removes a task', () => {
-    cy.get('[data-testid="task-input"]').type('Buy bread')
-
-    cy.get(`[data-testid="add-task__btn"]`).should('exist').should('be.visible').click()
-
-    cy.contains('Buy bread').should('exist')
-
-    cy.contains('Buy bread')
+  const removeTask = (text: string) => {
+    cy.contains(text)
       .should('exist')
       .closest('li')
       .find('.delete-btn')
@@ -34,15 +18,49 @@ describe('To-Do App', () => {
       .should('be.visible')
       .click()
 
-    cy.contains('Buy bread').should('not.exist')
+    cy.contains(text).should('not.exist')
+  }
+
+  beforeEach(() => {
+    cy.visit('/')
+  })
+
+  it('adds a new task', () => {
+    const task = uniqueTask('Buy milk')
+
+    addTask(task)
+    cy.contains(task).should('exist')
+
+    removeTask(task)
+  })
+
+  it('toggles the task status', () => {
+    const task = uniqueTask('Do a workout')
+
+    addTask(task)
+
+    cy.contains(task).click()
+    cy.contains(task).should('have.class', 'line-through')
+
+    removeTask(task)
+  })
+
+  it('removes a task', () => {
+    const task = uniqueTask('Buy bread')
+
+    addTask(task)
+    cy.contains(task).should('exist')
+
+    removeTask(task)
   })
 
   it('keeps tasks after a page reload', () => {
-    cy.get('[data-testid="task-input"]').type('Learn Cypress')
-    cy.get(`[data-testid="add-task__btn"]`).should('exist').should('be.visible').click()
+    const task = uniqueTask('Learn Cypress')
 
+    addTask(task)
     cy.reload()
+    cy.contains(task).should('exist')
 
-    cy.contains('Learn Cypress').should('exist')
+    removeTask(task)
   })
 })

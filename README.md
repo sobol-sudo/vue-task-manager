@@ -24,12 +24,12 @@ Live demo: https://super-to-do-list.vercel.app
 - Create tasks with a priority level (low / medium / high), rendered as a colored marker
 - Toggle completion by clicking a task; remove it with a per-item delete button
 - Filter by all / active / completed, combined with case-insensitive text search
-- Import and export the task list as JSON, with shape validation on import
+- Import and export the task list as JSON, with shape validation on import; an import is written through the active persistence mode, so it survives navigation and reloads
 - Incremental rendering — 15 tasks at a time, extended as you scroll
 - Light and dark theme, initialized from the OS `prefers-color-scheme` and persisted in `localStorage`
-- Language switching between English and Russian, persisted in `localStorage`
+- Language switching between English and Russian, persisted in `localStorage`, English by default
 - Two persistence modes behind one store: `localStorage` in development, REST API (`VITE_API_URL`) in production
-- Three routes — Home, Settings, About — all lazy-loaded
+- Three routes — Home, Settings, About — all lazy-loaded, plus a 404 view for anything else
 
 ## Testing
 
@@ -37,12 +37,13 @@ Unit tests sit next to the components in `src/components/__tests__` and run in j
 
 - `TaskInput.spec.ts` — dispatches `addTask` on submit, and does nothing when the input is empty
 - `TaskItem.spec.ts` — dispatches `toggleTask` on click and `removeTask` from the delete button
+- `taskStore.spec.ts` — imports are written to the backend rather than only to memory, a rejected import leaves no tasks in state, and ids coming back as strings are normalized to numbers
 
 ```sh
 npm run test:unit
 ```
 
-End-to-end tests in `cypress/e2e` run against the production build. `start-server-and-test` boots `vite preview` on port 4173 and hands off to Cypress, so no server has to be started by hand. Components expose `data-testid` hooks, keeping the specs independent of styling. Covered flows: adding a task, toggling its status, deleting it, and verifying tasks survive a page reload.
+End-to-end tests in `cypress/e2e` run against the production build. `start-server-and-test` boots `vite preview` on port 4173 and hands off to Cypress, so no server has to be started by hand. Components expose `data-testid` hooks, keeping the specs independent of styling. Covered flows: adding a task, toggling its status, deleting it, and verifying tasks survive a page reload. Because the production build writes to the REST backend, each spec uses a run-scoped task name and deletes what it created, so runs stay repeatable and leave no test data behind.
 
 ```sh
 npm run test:e2e       # headless, against a production build
@@ -76,6 +77,14 @@ npm run preview
 ```
 
 Outside development mode the store talks to a REST API instead, issuing `GET`, `POST`, `PUT` and `DELETE` requests against `${VITE_API_URL}/tasks`, so set `VITE_API_URL` before building.
+
+The public demo runs against a shared mock backend, which anyone can write to. To put it back into a representative state — ten tasks spread across the three priorities, a few of them completed:
+
+```sh
+npm run seed:demo -- --yes
+```
+
+It reads `VITE_API_URL` from the environment (falling back to `.env.production`), deletes the tasks currently on the backend and recreates the fixed set in `scripts/seed-demo-tasks.mjs`.
 
 ## License
 

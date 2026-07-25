@@ -18,7 +18,6 @@ const messages = {
     todo_list: 'To-Do List',
     export: '📤 Export',
     import: '📥 Import',
-    import_success: '✅ File imported successfully!',
     search_placeholder: '🔍 Search tasks...',
     no_tasks: '❌ No tasks found',
     error: {
@@ -26,6 +25,10 @@ const messages = {
       invalid_json: 'Error: Invalid JSON format',
       import_failed: 'Error loading JSON file',
     },
+    // NotFoundView
+    not_found_title: '404 — Page not found',
+    not_found_description: 'This page does not exist. It may have been moved or the link is wrong.',
+    not_found_back_home: '🏠 Back to the task list',
     // AboutView
     about_description: '📌 Simple To-Do application on Vue 3.',
     about_tech: '🛠 Powered by Pinia and Vue Router.',
@@ -63,6 +66,9 @@ const messages = {
       task_completed_api: '🎉 Task completed! (API)',
       task_reactivated_api: '🔄 Task is active again (API)',
       task_update_failed: '⚠️ Failed to update task!',
+      tasks_imported_local: '✅ Tasks imported and saved (LocalStorage)',
+      tasks_imported_api: '✅ Tasks imported and saved (API)',
+      tasks_import_failed: '⚠️ Failed to save the imported tasks!',
     },
   },
   ru: {
@@ -82,7 +88,6 @@ const messages = {
     todo_list: 'Список задач',
     export: '📤 Экспорт',
     import: '📥 Импорт',
-    import_success: '✅ Файл успешно импортирован!',
     search_placeholder: '🔍 Поиск задач...',
     no_tasks: '❌ Задачи не найдены',
     error: {
@@ -90,6 +95,10 @@ const messages = {
       invalid_json: 'Ошибка: Некорректный формат JSON',
       import_failed: 'Ошибка при загрузке JSON',
     },
+    // NotFoundView
+    not_found_title: '404 — Страница не найдена',
+    not_found_description: 'Такой страницы нет. Возможно, она была перемещена или ссылка неверна.',
+    not_found_back_home: '🏠 Вернуться к списку задач',
     // AboutView
     about_description: '📌 Простое To-Do приложение на Vue 3.',
     about_tech: '🛠 Использует Pinia и Vue Router.',
@@ -127,15 +136,20 @@ const messages = {
       task_completed_api: '🎉 Задача выполнена! (API)',
       task_reactivated_api: '🔄 Задача снова активна (API)',
       task_update_failed: '⚠️ Не удалось обновить задачу!',
+      tasks_imported_local: '✅ Задачи импортированы и сохранены (LocalStorage)',
+      tasks_imported_api: '✅ Задачи импортированы и сохранены (API)',
+      tasks_import_failed: '⚠️ Не удалось сохранить импортированные задачи!',
     },
   },
 }
 
-const defaultLang = localStorage.getItem('language') || 'ru'
+const defaultLang = localStorage.getItem('language') || 'en'
+
+document.documentElement.lang = defaultLang
 
 const i18n = createI18n({
   locale: defaultLang,
-  fallbackLocale: 'ru',
+  fallbackLocale: 'en',
   messages,
 })
 
