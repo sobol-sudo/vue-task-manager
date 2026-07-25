@@ -33,19 +33,26 @@ Live demo: https://super-to-do-list.vercel.app
 
 ## Testing
 
-Unit tests sit next to the components in `src/components/__tests__` and run in jsdom. Components are mounted with Vue Test Utils against a `createTestingPinia` instance, so store actions are asserted as spies instead of through real persistence:
+Unit tests sit in `__tests__` folders next to the code they cover and run in jsdom. Except where a test is specifically about a component refusing to call the store, they use a real Pinia instance and stub only the boundary — `fetch` or a single store action — so the store's own logic actually executes:
 
-- `TaskInput.spec.ts` — dispatches `addTask` on submit, and does nothing when the input is empty
-- `TaskItem.spec.ts` — dispatches `toggleTask` on click and `removeTask` from the delete button
-- `taskStore.spec.ts` — imports are written to the backend rather than only to memory, a rejected import leaves no tasks in state, and ids coming back as strings are normalized to numbers
+- `taskStore.spec.ts` — state is written only once the backend has confirmed the change: a rejected `POST`, `DELETE` or `PUT` leaves the list exactly as it was. Ids arriving as strings are normalized to numbers, so a freshly added task can be removed without a reload, and an import that fails leaves nothing behind.
+- `TaskList.spec.ts` — the list renders one page of 15 and appends the next page per scroll, and narrows correctly by filter and by case-insensitive search.
+- `TaskInput.spec.ts` — submits with the button and with Enter, carrying the selected priority; refuses an empty or whitespace-only task and says why.
+- `TaskImportExport.spec.ts` — a file that is not a task list never reaches the store, and an exported file is accepted by the app's own import with the same tasks.
+- `TaskItem.spec.ts` — dispatches `toggleTask` on click and `removeTask` from the delete button.
+- `i18n.spec.ts` — both locales define the same keys, and every key the source asks for exists.
+- `HomeView.spec.ts` — the page takes all of its text, heading included, from the catalogue.
 
 ```sh
-npm run test:unit
+npm test           # single run
+npm run test:unit  # watch mode
 ```
 
-End-to-end tests in `cypress/e2e` run against the production build. `start-server-and-test` boots `vite preview` on port 4173 and hands off to Cypress, so no server has to be started by hand. Components expose `data-testid` hooks, keeping the specs independent of styling. Covered flows: adding a task, toggling its status, deleting it, and verifying tasks survive a page reload.
+End-to-end tests live in `cypress/e2e`. `start-server-and-test` boots `vite preview` on port 4173 and hands off to Cypress, so no server has to be started by hand. Components expose `data-testid` hooks, keeping the specs independent of styling.
 
-The production build writes to the REST backend, which every run shares with whatever is already stored there, so the suite is written not to depend on — or disturb — that state:
+`to-do-app.cy.ts` drives the app against its real persistence layer — adding a task, toggling it, deleting it, and reloading the page to prove it was stored. `known-task-list.cy.ts` covers what a shared backend cannot support: it replaces persistence for the duration of each test (stubbed REST calls against a production build, seeded `localStorage` against the dev server) and checks pagination past the first page, filtering and search on a list of a known size, and that a JSON import replaces the stored list and survives a reload. Nothing leaves the browser in that spec, so it passes with the backend switched off.
+
+The production build writes to the REST backend, which every run shares with whatever is already stored there, so `to-do-app.cy.ts` is written not to depend on — or disturb — that state:
 
 - Each run names its tasks with a timestamp, so concurrent or repeated runs never collide.
 - Finding a task pages through the list until it appears, rather than assuming it landed on the first screen. The list renders 15 tasks at a time, so a task created during the run sits one page further down for every 15 tasks the backend already held; the suite passes whether that count is 0 or 200.
