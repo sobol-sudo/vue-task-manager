@@ -14,6 +14,7 @@ const i18n = createI18n({
       'components.task_input.priority.low': 'Low',
       'components.task_input.priority.medium': 'Medium',
       'components.task_input.priority.high': 'High',
+      'error.empty_task': 'Type a task before adding it',
     },
   },
 })

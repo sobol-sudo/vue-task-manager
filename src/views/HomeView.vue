@@ -16,7 +16,7 @@ const searchQuery = ref('')
   <div
     class="container max-w-lg mx-auto p-6 shadow-lg rounded-lg flex flex-col gap-[10px] bg-white text-black dark:bg-[#1e1e1e] dark:text-white"
   >
-    <h1 class="text-2xl font-bold text-center">To-Do List</h1>
+    <h1 class="text-2xl font-bold text-center">{{ t('todo_list') }}</h1>
 
     <TaskImportExport />
 

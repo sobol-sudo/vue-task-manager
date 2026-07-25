@@ -2,15 +2,23 @@
 import { useTaskStore } from '@/store/taskStore'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useToast } from 'vue-toastification'
 
 const { t } = useI18n()
+const toast = useToast()
 
 const newTask = ref('')
 const priority = ref<'low' | 'medium' | 'high'>('low')
 const taskStore = useTaskStore()
 
 const addTask = () => {
-  if (!newTask.value.trim()) return
+  // Every other action in the app reports back through a toast; staying silent
+  // here would make the button look broken rather than the input look empty.
+  if (!newTask.value.trim()) {
+    toast.error(t('error.empty_task'))
+    return
+  }
+
   taskStore.addTask({
     text: newTask.value,
     priority: priority.value,

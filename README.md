@@ -21,7 +21,7 @@ Live demo: https://super-to-do-list.vercel.app
 
 ## Features
 
-- Create tasks with a priority level (low / medium / high), rendered as a colored marker
+- Create tasks with a priority level (low / medium / high), rendered as a colored marker; submitting an empty one is rejected with a message rather than silently ignored
 - Toggle completion by clicking a task; remove it with a per-item delete button
 - Filter by all / active / completed, combined with case-insensitive text search
 - Import and export the task list as JSON, with shape validation on import; an import is written through the active persistence mode, so it survives navigation and reloads
@@ -43,7 +43,15 @@ Unit tests sit next to the components in `src/components/__tests__` and run in j
 npm run test:unit
 ```
 
-End-to-end tests in `cypress/e2e` run against the production build. `start-server-and-test` boots `vite preview` on port 4173 and hands off to Cypress, so no server has to be started by hand. Components expose `data-testid` hooks, keeping the specs independent of styling. Covered flows: adding a task, toggling its status, deleting it, and verifying tasks survive a page reload. Because the production build writes to the REST backend, each spec uses a run-scoped task name and deletes what it created, so runs stay repeatable and leave no test data behind.
+End-to-end tests in `cypress/e2e` run against the production build. `start-server-and-test` boots `vite preview` on port 4173 and hands off to Cypress, so no server has to be started by hand. Components expose `data-testid` hooks, keeping the specs independent of styling. Covered flows: adding a task, toggling its status, deleting it, and verifying tasks survive a page reload.
+
+The production build writes to the REST backend, which every run shares with whatever is already stored there, so the suite is written not to depend on — or disturb — that state:
+
+- Each run names its tasks with a timestamp, so concurrent or repeated runs never collide.
+- Finding a task pages through the list until it appears, rather than assuming it landed on the first screen. The list renders 15 tasks at a time, so a task created during the run sits one page further down for every 15 tasks the backend already held; the suite passes whether that count is 0 or 200.
+- Everything a spec created is deleted in an `afterEach`, straight through the REST API rather than the UI. A test that fails halfway still hands the backend back exactly as it found it, so a failing run leaves no orphan records behind for the next one.
+
+Cleanup needs the backend URL, which `cypress.config.ts` resolves the way Vite does — `VITE_API_URL` from the environment, then `.env.production.local`, then `.env.production` — and passes to the specs as `Cypress.env('apiUrl')`.
 
 ```sh
 npm run test:e2e       # headless, against a production build

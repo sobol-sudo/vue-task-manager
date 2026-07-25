@@ -24,6 +24,7 @@ const messages = {
       no_file: '⚠️ Error: no file selected',
       invalid_json: 'Error: Invalid JSON format',
       import_failed: 'Error loading JSON file',
+      empty_task: '⚠️ Type a task before adding it',
     },
     // NotFoundView
     not_found_title: '404 — Page not found',
@@ -94,6 +95,7 @@ const messages = {
       no_file: '⚠️ Ошибка: Файл не выбран',
       invalid_json: 'Ошибка: Некорректный формат JSON',
       import_failed: 'Ошибка при загрузке JSON',
+      empty_task: '⚠️ Введите задачу перед добавлением',
     },
     // NotFoundView
     not_found_title: '404 — Страница не найдена',
