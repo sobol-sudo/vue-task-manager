@@ -19,7 +19,7 @@ const i18n = createI18n({
 })
 
 describe('TaskInput.vue', () => {
-  it('добавляет задачу при нажатии на кнопку', async () => {
+  it('adds a task when the button is clicked', async () => {
     const wrapper = mount(TaskInput, {
       global: {
         plugins: [createTestingPinia({ createSpy: vi.fn }), i18n],
@@ -30,13 +30,13 @@ describe('TaskInput.vue', () => {
     const input = wrapper.find('input')
     const button = wrapper.find('button')
 
-    await input.setValue('Новая задача')
+    await input.setValue('New task')
     await button.trigger('click')
 
     expect(taskStore.addTask).toHaveBeenCalled()
   })
 
-  it('не добавляет задачу, если поле пустое', async () => {
+  it('does not add a task when the input is empty', async () => {
     const wrapper = mount(TaskInput, {
       global: {
         plugins: [createTestingPinia({ createSpy: vi.fn }), i18n],

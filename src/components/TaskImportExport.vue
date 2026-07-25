@@ -23,7 +23,7 @@ const exportTasks = () => {
 const importTasks = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0]
   if (!file) {
-    toast.error('⚠️ Ошибка: Файл не выбран')
+    toast.error(t('error.no_file'))
     return
   }
 
@@ -35,14 +35,15 @@ const importTasks = (event: Event) => {
         !Array.isArray(importedTasks) ||
         !importedTasks.every((task) => 'id' in task && 'text' in task)
       ) {
-        throw new Error('Некорректный формат JSON')
+        toast.error(t('error.invalid_json'))
+        return
       }
 
       taskStore.tasks = importedTasks
-      toast.success('✅ Файл успешно импортирован!')
+      toast.success(t('import_success'))
     } catch (error) {
-      console.error('Ошибка при загрузке JSON:', error)
-      toast.error('⚠️ Ошибка при загрузке файла')
+      console.error('Failed to read the imported JSON file:', error)
+      toast.error(t('error.import_failed'))
     }
   }
   reader.readAsText(file)

@@ -5,7 +5,7 @@ import { createTestingPinia } from '@pinia/testing'
 import { useTaskStore } from '@/store/taskStore'
 
 describe('TaskItem.vue', () => {
-  it('переключает статус при клике', async () => {
+  it('toggles the task status on click', async () => {
     const wrapper = mount(TaskItem, {
       global: {
         plugins: [
@@ -30,7 +30,7 @@ describe('TaskItem.vue', () => {
     expect(taskStore.toggleTask).toHaveBeenCalledWith(1)
   })
 
-  it('удаляет задачу по кнопке', async () => {
+  it('removes the task via the delete button', async () => {
     const wrapper = mount(TaskItem, {
       global: {
         plugins: [

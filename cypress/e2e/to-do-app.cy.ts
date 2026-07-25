@@ -3,33 +3,30 @@ describe('To-Do App', () => {
     cy.visit('/')
   })
 
-  it('Добавляет новую задачу', () => {
-    cy.get('[data-testid="task-input"]').type('Купить молоко')
+  it('adds a new task', () => {
+    cy.get('[data-testid="task-input"]').type('Buy milk')
 
     cy.get(`[data-testid="add-task__btn"]`).should('exist').should('be.visible').click()
 
-    cy.contains('Купить молоко').should('exist')
+    cy.contains('Buy milk').should('exist')
   })
 
-  it('Переключает статус задачи', () => {
-    cy.get('[data-testid="task-input"]').type('Сделать зарядку')
+  it('toggles the task status', () => {
+    cy.get('[data-testid="task-input"]').type('Do a workout')
     cy.get(`[data-testid="add-task__btn"]`).should('exist').should('be.visible').click()
 
-    cy.contains('Сделать зарядку').click()
-    cy.contains('Сделать зарядку').should('have.class', 'line-through')
+    cy.contains('Do a workout').click()
+    cy.contains('Do a workout').should('have.class', 'line-through')
   })
 
-  it('Удаляет задачу', () => {
-    cy.get('[data-testid="task-input"]').type('Купить хлеб')
+  it('removes a task', () => {
+    cy.get('[data-testid="task-input"]').type('Buy bread')
 
-    cy.get(`[data-testid="add-task__btn"]`)
-      .should('exist')
-      .should('be.visible')
-      .click()
+    cy.get(`[data-testid="add-task__btn"]`).should('exist').should('be.visible').click()
 
-    cy.contains('Купить хлеб').should('exist')
+    cy.contains('Buy bread').should('exist')
 
-    cy.contains('Купить хлеб')
+    cy.contains('Buy bread')
       .should('exist')
       .closest('li')
       .find('.delete-btn')
@@ -37,16 +34,15 @@ describe('To-Do App', () => {
       .should('be.visible')
       .click()
 
-    cy.contains('Купить хлеб').should('not.exist')
+    cy.contains('Buy bread').should('not.exist')
   })
 
-
-  it('Задачи сохраняются после перезагрузки', () => {
-    cy.get('[data-testid="task-input"]').type('Выучить Cypress')
+  it('keeps tasks after a page reload', () => {
+    cy.get('[data-testid="task-input"]').type('Learn Cypress')
     cy.get(`[data-testid="add-task__btn"]`).should('exist').should('be.visible').click()
 
     cy.reload()
 
-    cy.contains('Выучить Cypress').should('exist')
+    cy.contains('Learn Cypress').should('exist')
   })
 })

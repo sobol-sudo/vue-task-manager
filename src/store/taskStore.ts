@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type { Task } from '@/types'
 import { useToast } from 'vue-toastification'
+import { t } from '@/lang/i18n'
 
 const toast = useToast()
 const isDev = import.meta.env.MODE === 'development'
@@ -17,16 +18,16 @@ export const useTaskStore = defineStore('taskStore', {
         if (isDev) {
           const savedTasks = localStorage.getItem('tasks')
           this.tasks = savedTasks ? JSON.parse(savedTasks) : []
-          toast.success('✅ Данные загружены из LocalStorage')
+          toast.success(t('store.tasks_loaded_local'))
         } else {
           const response = await fetch(`${API_URL}/tasks`)
-          if (!response.ok) throw new Error('Ошибка загрузки задач')
+          if (!response.ok) throw new Error('Failed to load tasks')
           this.tasks = await response.json()
-          toast.success('✅ Данные загружены с сервера')
+          toast.success(t('store.tasks_loaded_api'))
         }
       } catch (error) {
-        console.error('Ошибка API:', error)
-        toast.error('⚠️ Не удалось загрузить задачи!')
+        console.error('API error:', error)
+        toast.error(t('store.tasks_load_failed'))
       }
     },
 
@@ -36,21 +37,21 @@ export const useTaskStore = defineStore('taskStore', {
           const newTask: Task = { ...task, id: Date.now() }
           this.tasks = [...this.tasks, newTask]
           localStorage.setItem('tasks', JSON.stringify(this.tasks))
-          toast.success('✅ Задача добавлена (LocalStorage)')
+          toast.success(t('store.task_added_local'))
         } else {
           const response = await fetch(`${API_URL}/tasks`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(task),
           })
-          if (!response.ok) throw new Error('Ошибка при добавлении задачи')
+          if (!response.ok) throw new Error('Failed to add the task')
           const newTask = await response.json()
           this.tasks = [...this.tasks, newTask]
-          toast.success('✅ Задача добавлена (API)')
+          toast.success(t('store.task_added_api'))
         }
       } catch (error) {
-        console.error('Ошибка API:', error)
-        toast.error('⚠️ Не удалось добавить задачу!')
+        console.error('API error:', error)
+        toast.error(t('store.task_add_failed'))
       }
     },
 
@@ -59,24 +60,24 @@ export const useTaskStore = defineStore('taskStore', {
         if (isDev) {
           this.tasks = this.tasks.filter((task) => task.id !== id)
           localStorage.setItem('tasks', JSON.stringify(this.tasks))
-          toast.info('🗑️ Задача удалена (LocalStorage)')
+          toast.info(t('store.task_removed_local'))
         } else {
           const response = await fetch(`${API_URL}/tasks/${id}`, {
             method: 'DELETE',
           })
-          if (!response.ok) throw new Error('Ошибка при удалении задачи')
+          if (!response.ok) throw new Error('Failed to remove the task')
           this.tasks = this.tasks.filter((task) => task.id !== id)
-          toast.info('🗑️ Задача удалена (API)')
+          toast.info(t('store.task_removed_api'))
         }
       } catch (error) {
-        console.error('Ошибка API:', error)
-        toast.error('⚠️ Не удалось удалить задачу!')
+        console.error('API error:', error)
+        toast.error(t('store.task_remove_failed'))
       }
     },
 
     async toggleTask(id: number) {
       try {
-        const taskIndex = this.tasks.findIndex((t) => t.id === id)
+        const taskIndex = this.tasks.findIndex((task) => task.id === id)
         if (taskIndex === -1) return
 
         const updatedTask = {
@@ -89,8 +90,8 @@ export const useTaskStore = defineStore('taskStore', {
           localStorage.setItem('tasks', JSON.stringify(this.tasks))
           toast.success(
             updatedTask.completed
-              ? '🎉 Задача выполнена! (LocalStorage)'
-              : '🔄 Задача снова активна (LocalStorage)',
+              ? t('store.task_completed_local')
+              : t('store.task_reactivated_local'),
           )
         } else {
           const response = await fetch(`${API_URL}/tasks/${id}`, {
@@ -98,16 +99,16 @@ export const useTaskStore = defineStore('taskStore', {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updatedTask),
           })
-          if (!response.ok) throw new Error('Ошибка при обновлении задачи')
+          if (!response.ok) throw new Error('Failed to update the task')
 
           this.tasks = this.tasks.map((task) => (task.id === id ? updatedTask : task))
           toast.success(
-            updatedTask.completed ? '🎉 Задача выполнена! (API)' : '🔄 Задача снова активна (API)',
+            updatedTask.completed ? t('store.task_completed_api') : t('store.task_reactivated_api'),
           )
         }
       } catch (error) {
-        console.error('Ошибка API:', error)
-        toast.error('⚠️ Не удалось обновить задачу!')
+        console.error('API error:', error)
+        toast.error(t('store.task_update_failed'))
       }
     },
   },
