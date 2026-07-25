@@ -4,7 +4,7 @@ A single-page task manager built with Vue 3, TypeScript and Vite. A single Pinia
 
 ![Task manager UI](https://github.com/user-attachments/assets/4088a259-3b9b-4e44-8a2a-7861419d01b3)
 
-Live demo: https://vue-task-manager.vercel.app
+Live demo: https://super-to-do-list.vercel.app
 
 ## Tech stack
 
