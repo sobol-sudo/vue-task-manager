@@ -57,7 +57,17 @@ onUnmounted(() => {
     <TaskItem v-for="task in paginatedTasks" :key="task.id" :task="task" />
   </ul>
 
-  <p v-if="paginatedTasks.length === 0" class="text-black dark:text-gray-400 text-center mt-4">
-    {{ t('no_tasks') }}
+  <!--
+    Three states, not one: still loading, nothing stored at all, and a filter or
+    a search that matched nothing. Collapsing them into a single "no tasks found"
+    told a first-time visitor their search had failed before they had typed
+    anything.
+  -->
+  <p v-if="taskStore.isLoading" class="text-black dark:text-gray-400 text-center mt-4">
+    {{ t('loading_tasks') }}
+  </p>
+
+  <p v-else-if="paginatedTasks.length === 0" class="text-black dark:text-gray-400 text-center mt-4">
+    {{ taskStore.tasks.length === 0 ? t('no_tasks_yet') : t('no_tasks') }}
   </p>
 </template>

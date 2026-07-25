@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils'
 import TaskItem from '@/components/TaskItem.vue'
 import { createTestingPinia } from '@pinia/testing'
 import { useTaskStore } from '@/store/taskStore'
+import { createTestI18n } from '@/__tests__/testI18n'
 
 describe('TaskItem.vue', () => {
   it('toggles the task status on click', async () => {
@@ -12,6 +13,7 @@ describe('TaskItem.vue', () => {
           createTestingPinia({
             createSpy: vi.fn,
           }),
+          createTestI18n('en'),
         ],
       },
       props: {
@@ -37,6 +39,7 @@ describe('TaskItem.vue', () => {
           createTestingPinia({
             createSpy: vi.fn,
           }),
+          createTestI18n('en'),
         ],
       },
       props: {

@@ -31,10 +31,17 @@ const normalizeTask = (raw: Partial<Task>, fallbackId: number): Task => {
 export const useTaskStore = defineStore('taskStore', {
   state: () => ({
     tasks: [] as Task[],
+    // The first load is a round trip to the REST backend, and an empty list
+    // means two different things while it is in flight: "nothing stored yet" or
+    // "not known yet". Without this flag the UI has to guess, and it guessed
+    // wrong — every page load flashed the empty state before the tasks arrived.
+    isLoading: false,
   }),
 
   actions: {
     async fetchTasks() {
+      this.isLoading = true
+
       try {
         if (isDev) {
           const savedTasks = localStorage.getItem('tasks')
@@ -51,6 +58,8 @@ export const useTaskStore = defineStore('taskStore', {
       } catch (error) {
         console.error('API error:', error)
         toast.error(t('store.tasks_load_failed'))
+      } finally {
+        this.isLoading = false
       }
     },
 

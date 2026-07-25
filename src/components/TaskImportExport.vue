@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useTaskStore } from '@/store/taskStore'
 import { useToast } from 'vue-toastification'
 import { useI18n } from 'vue-i18n'
@@ -8,7 +9,17 @@ const { t } = useI18n()
 const toast = useToast()
 const taskStore = useTaskStore()
 
+const fileInput = ref<HTMLInputElement | null>(null)
+
 const exportTasks = () => {
+  // A download is invisible until the browser decides to reveal it, and on an
+  // empty list there is nothing to download at all — the button would appear
+  // broken. Report both outcomes the way every other action in the app does.
+  if (taskStore.tasks.length === 0) {
+    toast.error(t('error.nothing_to_export'))
+    return
+  }
+
   const dataStr = JSON.stringify(taskStore.tasks, null, 2)
   const blob = new Blob([dataStr], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
@@ -16,9 +27,15 @@ const exportTasks = () => {
   const a = document.createElement('a')
   a.href = url
   a.download = 'tasks.json'
-  a.click()
 
-  URL.revokeObjectURL(url)
+  // Not every browser follows a download on a detached anchor, and revoking the
+  // object URL in the same tick can cancel the one that started.
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 0)
+
+  toast.success(t('tasks_exported'))
 }
 
 const isValidTask = (task: unknown): task is Partial<Task> => {
@@ -63,17 +80,29 @@ const importTasks = (event: Event) => {
 <template>
   <div class="flex justify-between mt-4">
     <button
+      type="button"
+      data-testid="export-btn"
       @click="exportTasks"
-      class="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+      class="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
     >
       {{ t('export') }}
     </button>
 
-    <label
-      class="cursor-pointer px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+    <!--
+      A `<label>` wrapped around a `display: none` file input is clickable but
+      sits nowhere in the tab order, and neither does the input it hides — so
+      Import was a mouse-only control. A real button opens the same picker and
+      is reachable with Tab, Enter and Space.
+    -->
+    <button
+      type="button"
+      data-testid="import-btn"
+      @click="fileInput?.click()"
+      class="cursor-pointer px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
     >
       {{ t('import') }}
-      <input type="file" accept=".json" @change="importTasks" class="hidden" />
-    </label>
+    </button>
+
+    <input ref="fileInput" type="file" accept=".json" @change="importTasks" class="hidden" />
   </div>
 </template>

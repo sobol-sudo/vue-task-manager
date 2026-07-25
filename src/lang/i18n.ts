@@ -18,13 +18,17 @@ const messages = {
     todo_list: 'To-Do List',
     export: '📤 Export',
     import: '📥 Import',
+    tasks_exported: '📤 Task list saved as tasks.json',
     search_placeholder: '🔍 Search tasks...',
+    loading_tasks: '⏳ Loading tasks...',
     no_tasks: '❌ No tasks found',
+    no_tasks_yet: '📝 No tasks yet — add the first one above',
     error: {
       no_file: '⚠️ Error: no file selected',
       invalid_json: 'Error: Invalid JSON format',
       import_failed: 'Error loading JSON file',
       empty_task: '⚠️ Type a task before adding it',
+      nothing_to_export: '⚠️ There is nothing to export yet',
     },
     // NotFoundView
     not_found_title: '404 — Page not found',
@@ -49,6 +53,10 @@ const messages = {
           medium: 'Medium',
           high: 'High',
         },
+      },
+      task_item: {
+        delete: 'Delete this task',
+        priority_label: 'Priority',
       },
     },
     //Store
@@ -89,13 +97,17 @@ const messages = {
     todo_list: 'Список задач',
     export: '📤 Экспорт',
     import: '📥 Импорт',
+    tasks_exported: '📤 Список задач сохранён в tasks.json',
     search_placeholder: '🔍 Поиск задач...',
+    loading_tasks: '⏳ Загрузка задач...',
     no_tasks: '❌ Задачи не найдены',
+    no_tasks_yet: '📝 Задач пока нет — добавьте первую выше',
     error: {
       no_file: '⚠️ Ошибка: Файл не выбран',
       invalid_json: 'Ошибка: Некорректный формат JSON',
       import_failed: 'Ошибка при загрузке JSON',
       empty_task: '⚠️ Введите задачу перед добавлением',
+      nothing_to_export: '⚠️ Пока нечего экспортировать',
     },
     // NotFoundView
     not_found_title: '404 — Страница не найдена',
@@ -120,6 +132,10 @@ const messages = {
           medium: 'Средний',
           high: 'Высокий',
         },
+      },
+      task_item: {
+        delete: 'Удалить эту задачу',
+        priority_label: 'Приоритет',
       },
     },
     //Store

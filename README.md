@@ -25,11 +25,14 @@ Live demo: https://super-to-do-list.vercel.app
 - Toggle completion by clicking a task; remove it with a per-item delete button
 - Filter by all / active / completed, combined with case-insensitive text search
 - Import and export the task list as JSON, with shape validation on import; an import is written through the active persistence mode, so it survives navigation and reloads
+- Every control is operable from the keyboard and carries a name and a state: the row toggle is a real button with `aria-pressed`, the file picker is opened by a button rather than a label wrapped around a hidden input, the filters expose which one is on, and the priority dot is labelled rather than left as bare color
+- Distinct states for the list rather than one catch-all line — loading, nothing stored yet, and a filter or search that matched nothing
 - Incremental rendering — 15 tasks at a time, extended as you scroll
 - Light and dark theme, initialized from the OS `prefers-color-scheme` and persisted in `localStorage`
 - Language switching between English and Russian, persisted in `localStorage`, English by default
 - Two persistence modes behind one store: `localStorage` in development, REST API (`VITE_API_URL`) in production
-- Three routes — Home, Settings, About — all lazy-loaded, plus a 404 view for anything else
+- Three routes — Home, Settings, About — all lazy-loaded, plus a 404 view for anything else; the navigation marks the current one
+- Every store action reports its outcome through a toast, export included: an empty list says so instead of downloading an empty file
 
 ## Testing
 
